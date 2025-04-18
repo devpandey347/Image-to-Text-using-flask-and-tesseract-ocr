@@ -1,4 +1,5 @@
 # 🧠 OCR Image Text Extractor (Flask-based Tool)
+Preview on Youtube, Click on Image ♨️
 [![Watch on YouTube](https://img.youtube.com/vi/33mYqmLr2Ac/0.jpg)](https://www.youtube.com/watch?v=33mYqmLr2Ac)
 
 This is a powerful image-to-text extraction tool built using Flask and Tesseract OCR. Whether you're processing receipts, scanned documents, handwritten notes, or screenshots — this tool extracts text with high accuracy in just a few clicks.
