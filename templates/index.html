@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR Text Extraction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617',
+            },
+            accent: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #4338ca;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6366f1;
+    }
+
+    /* Gradient animation */
+    .gradient-bg {
+      background: linear-gradient(-45deg, #312e81, #1e1b4b, #3730a3, #4338ca);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Glassmorphism */
+    .glass {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+
+<body class="bg-dark-950 text-gray-100 min-h-screen font-sans">
+  <div class="gradient-bg fixed inset-0 opacity-20"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto p-4 md:p-6 lg:p-8">
+    <header class="mb-12 text-center">
+      <div class="inline-block mb-4 p-2 rounded-full bg-accent-900/30 backdrop-blur-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <line x1="10" y1="9" x2="8" y2="9"></line>
+        </svg>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-accent-300 to-accent-500 text-transparent bg-clip-text mb-2">Image to Text Tool</h1>
+      <p class="text-gray-400 max-w-2xl mx-auto">Extract text from images with advanced OCR technology powered by AI</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div class="lg:col-span-2 glass rounded-2xl p-6 shadow-xl border border-dark-700/50 backdrop-blur-md">
+        <h2 class="text-2xl font-semibold text-accent-300 mb-6 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          Extract Text from Image
+        </h2>
+
+        <!-- Upload Form -->
+        <form id="uploadForm" class="space-y-6">
+          <div class="space-y-2">
+            <label for="imageInput" class="block text-gray-300 font-medium text-sm">Upload Image</label>
+            <div class="relative group">
+              <div class="absolute inset-0 bg-gradient-to-r from-accent-600 to-accent-800 rounded-lg blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+              <label for="imageInput" class="relative flex items-center justify-center w-full h-32 border-2 border-dashed border-dark-600 rounded-lg cursor-pointer bg-dark-800/50 hover:bg-dark-800/80 transition duration-300">
+                <div class="text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <p class="mt-2 text-sm text-gray-400">Drag and drop or click to upload</p>
+                  <p class="text-xs text-gray-500">PNG, JPG, JPEG</p>
+                </div>
+                <input type="file" id="imageInput" accept="image/png, image/jpeg, image/jpg" class="hidden">
+              </label>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center">
+            <div class="border-t border-dark-600 w-full"></div>
+            <span class="px-4 text-gray-400 text-sm">OR</span>
+            <div class="border-t border-dark-600 w-full"></div>
+          </div>
+
+          <div class="space-y-2">
+            <label for="imageUrl" class="block text-gray-300 font-medium text-sm">Image URL</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <input type="text" id="imageUrl" placeholder="https://example.com/image.jpg" class="w-full pl-10 pr-4 py-3 bg-dark-900/70 border border-dark-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 text-gray-200 placeholder-gray-500">
+            </div>
+          </div>
+
+          <!-- Language Selection -->
+          <div class="space-y-2">
+            <label for="languageSelect" class="block text-gray-300 font-medium text-sm">Select Language</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 5h7"></path>
+                  <path d="M2 10h7"></path>
+                  <path d="M2 15h7"></path>
+                  <path d="M12 5a7 7 0 0 0 7 7"></path>
+                  <path d="M12 12a7 7 0 0 1 7 7"></path>
+                  <path d="M12 19V5"></path>
+                </svg>
+              </div>
+              <select id="languageSelect" class="w-full pl-10 pr-10 py-3 bg-dark-900/70 border border-dark-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 text-gray-200 appearance-none">
+                <option value="eng">English</option>
+                <option value="afr">Afrikaans</option>
+                <option value="amh">Amharic</option>
+                <option value="ara">Arabic</option>
+                <option value="asm">Assamese</option>
+                <option value="aze">Azerbaijani</option>
+                <option value="aze_cyrl">Azerbaijani (Cyrillic)</option>
+                <option value="bel">Belarusian</option>
+                <option value="ben">Bengali</option>
+                <option value="bod">Tibetan</option>
+                <option value="bos">Bosnian</option>
+                <option value="bre">Breton</option>
+                <option value="bul">Bulgarian</option>
+                <option value="cat">Catalan</option>
+                <option value="ceb">Cebuano</option>
+                <option value="ces">Czech</option>
+                <option value="chi_sim">Chinese (Simplified)</option>
+                <option value="chi_tra">Chinese (Traditional)</option>
+                <option value="chr">Cherokee</option>
+                <option value="cos">Corsican</option>
+                <option value="cym">Welsh</option>
+                <option value="dan">Danish</option>
+                <option value="deu">German</option>
+                <option value="div">Dhivehi</option>
+                <option value="dzo">Dzongkha</option>
+                <option value="ell">Greek</option>
+                <option value="enm">Middle English</option>
+                <option value="epo">Esperanto</option>
+                <option value="est">Estonian</option>
+                <option value="eus">Basque</option>
+                <option value="fao">Faroese</option>
+                <option value="fas">Persian</option>
+                <option value="fil">Filipino</option>
+                <option value="fin">Finnish</option>
+                <option value="fra">French</option>
+                <option value="frm">Middle French</option>
+                <option value="fry">Frisian</option>
+                <option value="gla">Scottish Gaelic</option>
+                <option value="gle">Irish</option>
+                <option value="glg">Galician</option>
+                <option value="guj">Gujarati</option>
+                <option value="hat">Haitian Creole</option>
+                <option value="heb">Hebrew</option>
+                <option value="hin">Hindi</option>
+                <option value="hrv">Croatian</option>
+                <option value="hun">Hungarian</option>
+                <option value="hye">Armenian</option>
+                <option value="ind">Indonesian</option>
+                <option value="isl">Icelandic</option>
+                <option value="ita">Italian</option>
+                <option value="jav">Javanese</option>
+                <option value="jpn">Japanese</option>
+                <option value="kan">Kannada</option>
+                <option value="kat">Georgian</option>
+                <option value="kaz">Kazakh</option>
+                <option value="khm">Khmer</option>
+                <option value="kir">Kyrgyz</option>
+                <option value="kmr">Kurdish</option>
+                <option value="kor">Korean</option>
+                <option value="lao">Lao</option>
+                <option value="lat">Latin</option>
+                <option value="lav">Latvian</option>
+                <option value="lit">Lithuanian</option>
+                <option value="ltz">Luxembourgish</option>
+                <option value="mal">Malayalam</option>
+                <option value="mar">Marathi</option>
+                <option value="mkd">Macedonian</option>
+                <option value="mlt">Maltese</option>
+                <option value="mon">Mongolian</option>
+                <option value="mri">Maori</option>
+                <option value="msa">Malay</option>
+                <option value="mya">Burmese</option>
+                <option value="nep">Nepali</option>
+                <option value="nld">Dutch</option>
+                <option value="nor">Norwegian</option>
+                <option value="oci">Occitan</option>
+                <option value="ori">Odia</option>
+                <option value="pan">Punjabi</option>
+                <option value="pol">Polish</option>
+                <option value="por">Portuguese</option>
+                <option value="pus">Pashto</option>
+                <option value="que">Quechua</option>
+                <option value="ron">Romanian</option>
+                <option value="rus">Russian</option>
+                <option value="san">Sanskrit</option>
+                <option value="sin">Sinhala</option>
+                <option value="slk">Slovak</option>
+                <option value="slv">Slovenian</option>
+                <option value="snd">Sindhi</option>
+                <option value="spa">Spanish</option>
+                <option value="sqi">Albanian</option>
+                <option value="srp">Serbian</option>
+                <option value="sun">Sundanese</option>
+                <option value="swa">Swahili</option>
+                <option value="swe">Swedish</option>
+                <option value="syr">Syriac</option>
+                <option value="tam">Tamil</option>
+                <option value="tat">Tatar</option>
+                <option value="tel">Telugu</option>
+                <option value="tgk">Tajik</option>
+                <option value="tgl">Tagalog</option>
+                <option value="tha">Thai</option>
+                <option value="tir">Tigrinya</option>
+                <option value="ton">Tongan</option>
+                <option value="tur">Turkish</option>
+                <option value="uig">Uyghur</option>
+                <option value="ukr">Ukrainian</option>
+                <option value="urd">Urdu</option>
+                <option value="uzb">Uzbek</option>
+                <option value="vie">Vietnamese</option>
+                <option value="yid">Yiddish</option>
+                <option value="yor">Yoruba</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 px-6 bg-gradient-to-r from-accent-600 to-accent-800 hover:from-accent-700 hover:to-accent-900 text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-accent-900/30 flex items-center justify-center space-x-2 relative overflow-hidden group">
+            <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <line x1="10" y1="9" x2="8" y2="9"></line>
+            </svg>
+            <span class="relative">Extract Text</span>
+          </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-dark-700/50">
+          <div class="flex items-center justify-between text-sm text-gray-400">
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Secure Processing</span>
+            </div>
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>99.8% Accuracy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3 space-y-8">
+        <!-- Image Preview -->
+        <div class="glass rounded-2xl p-6 shadow-xl border border-dark-700/50 backdrop-blur-md">
+          <h3 class="text-xl font-semibold text-accent-300 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            Image Preview
+          </h3>
+          <div class="flex items-center justify-center bg-dark-900/70 rounded-lg p-4 border border-dark-700/50 min-h-[200px] relative overflow-hidden">
+            <img id="previewImage" class="max-w-full max-h-[300px] rounded hidden object-contain" alt="Preview">
+            <div id="previewPlaceholder" class="text-gray-500 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-2 text-dark-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p>Upload an image or enter URL to see preview</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extracted Text Output -->
+        <div class="glass rounded-2xl p-6 shadow-xl border border-dark-700/50 backdrop-blur-md">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-accent-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Extracted Text
+            </h3>
+            <button id="copyButton" class="text-sm flex items-center text-accent-400 hover:text-accent-300 transition-colors duration-200 opacity-0 pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+              Copy to Clipboard
+            </button>
+          </div>
+          <div id="outputContainer" class="bg-dark-900/70 rounded-lg p-4 border border-dark-700/50 min-h-[200px] text-gray-300 whitespace-pre-wrap relative">
+            <div id="outputContent" class="hidden"></div>
+            <div id="outputPlaceholder" class="text-gray-500 text-center absolute inset-0 flex flex-col items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 text-dark-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p>Extracted text will appear here</p>
+            </div>
+            <div id="loadingIndicator" class="hidden absolute inset-0 flex flex-col items-center justify-center">
+              <div class="relative w-16 h-16">
+                <div class="absolute top-0 left-0 w-full h-full border-4 border-accent-300/20 rounded-full"></div>
+                <div class="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-accent-500 rounded-full animate-spin"></div>
+              </div>
+              <p class="mt-4 text-accent-300">Processing image...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-12 text-center text-gray-500 text-sm py-6 border-t border-dark-800/50">
+      <div class="flex justify-center space-x-6 mb-4">
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+          </svg>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+          </svg>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </a>
+        <a href="#" class="text-gray-400 hover:  y2="6.5"></line>
+          </svg>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+            <rect x="2" y="9" width="4" height="12"></rect>
+            <circle cx="4" cy="4" r="2"></circle>
+          </svg>
+        </a>
+      </div>
+      <p>Premium OCR Text Extraction Tool &copy; 2025 | All Rights Reserved</p>
+      <p class="mt-2 text-xs text-gray-600">Powered by Advanced AI Technology</p>
+    </footer>
+  </div>
+
+  <script>
+    // Global variables to track current image source
+    let currentImageFile = null;
+    let currentImageUrl = null;
+
+    // File input preview
+    document.getElementById("imageInput").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        // Clear URL input when file is selected
+        document.getElementById("imageUrl").value = "";
+        currentImageUrl = null;
+        currentImageFile = file;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("previewImage").src = e.target.result;
+          document.getElementById("previewImage").classList.remove("hidden");
+          document.getElementById("previewPlaceholder").classList.add("hidden");
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Copy to clipboard functionality
+    document.getElementById("copyButton").addEventListener("click", function() {
+      const text = document.getElementById("outputContent").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        // Show copied feedback
+        const originalText = this.innerHTML;
+        this.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Copied!
+        `;
+        setTimeout(() => {
+          this.innerHTML = originalText;
+        }, 2000);
+      });
+    });
+
+    // URL input preview
+    document.getElementById("imageUrl").addEventListener("input", function() {
+      const url = this.value.trim();
+      if (url) {
+        // Clear file input when URL is entered
+        document.getElementById("imageInput").value = "";
+        currentImageFile = null;
+        currentImageUrl = url;
+        
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = url;
+
+        // Handle image load
+        img.onload = function() {
+          document.getElementById("previewImage").src = url;
+          document.getElementById("previewImage").classList.remove("hidden");
+          document.getElementById("previewPlaceholder").classList.add("hidden");
+        };
+
+        // Handle image load error
+        img.onerror = function() {
+          document.getElementById("previewImage").classList.add("hidden");
+          document.getElementById("previewPlaceholder").classList.remove("hidden");
+          document.getElementById("previewPlaceholder").innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>Invalid image URL</p>
+          `;
+        };
+      }
+    });
+
+    // Form submission to extract text
+    document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const imageUrl = document.getElementById("imageUrl").value.trim();
+      const language = document.getElementById("languageSelect").value;
+
+      // Validate that we have either a file or URL
+      if (!currentImageFile && !currentImageUrl) {
+        alert("Please upload an image or enter an image URL.");
+        return;
+      }
+
+      // Show loading state
+      document.getElementById("outputPlaceholder").classList.add("hidden");
+      document.getElementById("loadingIndicator").classList.remove("hidden");
+      document.getElementById("outputContent").classList.add("hidden");
+      document.getElementById("copyButton").classList.add("opacity-0", "pointer-events-none");
+
+      let formData = new FormData();
+      
+      // Add the correct image source to formData
+      if (currentImageFile) {
+        formData.append("image", currentImageFile);
+      } else if (currentImageUrl) {
+        formData.append("image_url", currentImageUrl);
+      }
+      
+      formData.append("language", language);
+
+      try {
+        const response = await fetch("/extract_text", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        // Hide loading state
+        document.getElementById("loadingIndicator").classList.add("hidden");
+
+        if (data.extracted_text) {
+          document.getElementById("outputContent").innerHTML = data.extracted_text;
+          document.getElementById("outputContent").classList.remove("hidden");
+          document.getElementById("copyButton").classList.remove("opacity-0", "pointer-events-none");
+
+          // Only update the preview if it's from the API response and we don't already have a preview
+          if (data.image_base64 && !document.getElementById("previewImage").src) {
+            document.getElementById("previewImage").src = data.image_base64;
+            document.getElementById("previewImage").classList.remove("hidden");
+            document.getElementById("previewPlaceholder").classList.add("hidden");
+          }
+        } else {
+          document.getElementById("outputContent").innerHTML = `<div class="text-red-400">Error: ${data.error || 'Unknown error occurred'}</div>`;
+          document.getElementById("outputContent").classList.remove("hidden");
+        }
+      } catch (error) {
+        document.getElementById("loadingIndicator").classList.add("hidden");
+        document.getElementById("outputContent").innerHTML = `<div class="text-red-400">Error processing image. Please try again.</div>`;
+        document.getElementById("outputContent").classList.remove("hidden");
+      }
+    });
+  </script>
+
+</body>
+
+</html>
