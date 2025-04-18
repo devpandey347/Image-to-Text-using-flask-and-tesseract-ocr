@@ -60,6 +60,7 @@ Visit: `http://localhost:5000`
 
 **Tool developed by:** [www.github.com/nitiksh](https://github.com/nitiksh)  
 **Website:** [ntxm.org](https://ntxm.org)
+**Buy From:** [payhip.com](https://payhip.com/b/ka09N)
 
 - ✅ You are allowed to use this tool for both **development** and **production** if purchased legally from an authorized source.
 - ❌ Unauthorized use, reverse engineering, or redistribution without permission is strictly prohibited.
