@@ -87,6 +87,3 @@ DM via GitHub: [@nitiksh](https://github.com/nitiksh)
 
 This tool is protected under copyright and license terms.  
 By using this software, you agree to the terms and conditions listed above.
-
-
-<div class="payhip-embed-page" data-key="ka09N">...</div><script type="text/javascript" src="https://payhip.com/embed-page.js?v=24u68984"></script>
