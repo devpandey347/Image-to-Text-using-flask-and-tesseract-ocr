@@ -88,3 +88,9 @@ DM via GitHub: [@nitiksh](https://github.com/nitiksh)
 
 This tool is protected under copyright and license terms.  
 By using this software, you agree to the terms and conditions listed above.
+
+---
+
+**Created by:** [ntxm.org](https://ntxm.org) <br/>
+**GitHub Organization:** [https://github.com/ntxmofficial](https://github.com/ntxmofficial) <br/>
+**Author:** [https://github.com/nitiksh](https://github.com/nitiksh) <br/>
