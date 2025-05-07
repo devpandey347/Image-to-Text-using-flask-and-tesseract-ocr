@@ -1,4 +1,7 @@
 # 🧠 OCR Image Text Extractor (Flask-based Tool)
+[![🌐 ntxm.org](https://img.shields.io/badge/Website-ntxm.org-blue?style=flat-square)](https://ntxm.org)
+[![🏢 GitHub Org](https://img.shields.io/badge/GitHub-ntxmofficial-blue?style=flat-square)](https://github.com/ntxmofficial)
+[![👨‍💻 Author](https://img.shields.io/badge/Author-nitiksh-green?style=flat-square)](https://github.com/nitiksh)
 Preview on Youtube, Click on Image ♨️
 [![Watch on YouTube](https://img.youtube.com/vi/33mYqmLr2Ac/0.jpg)](https://www.youtube.com/watch?v=33mYqmLr2Ac)
 
