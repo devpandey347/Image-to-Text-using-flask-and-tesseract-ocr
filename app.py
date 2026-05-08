@@ -36,8 +36,10 @@ def allowed_file(filename):
 
 
 def unique_filename(filename):
-    safe_name = secure_filename(filename)
-    extension = safe_name.rsplit(".", 1)[1].lower()
+    _, extension = os.path.splitext(filename)
+    extension = extension.lstrip(".").lower()
+    if not extension:
+        return uuid.uuid4().hex
     return f"{uuid.uuid4().hex}.{extension}"
 
 
