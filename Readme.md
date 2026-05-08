@@ -2,13 +2,10 @@
 [![🌐 ntxm.org](https://img.shields.io/badge/Website-ntxm.org-blue?style=flat-square)](https://ntxm.org)
 [![🏢 GitHub Org](https://img.shields.io/badge/GitHub-ntxmofficial-blue?style=flat-square)](https://github.com/ntxmofficial)
 [![👨‍💻 Author](https://img.shields.io/badge/Author-nitiksh-green?style=flat-square)](https://github.com/nitiksh) <br/>
-Preview on Youtube, Click on Image ♨️
-[![Watch on YouTube](https://img.youtube.com/vi/33mYqmLr2Ac/0.jpg)](https://www.youtube.com/watch?v=33mYqmLr2Ac)
 
 This is a powerful image-to-text extraction tool built using Flask and Tesseract OCR. Whether you're processing receipts, scanned documents, handwritten notes, or screenshots — this tool extracts text with high accuracy in just a few clicks.
 
 > ✅ Created by [Nitiksh](https://github.com/nitiksh)  
-> 🔗 Website: [ntxm.org](https://ntxm.org)
 
 ---
 
@@ -61,36 +58,11 @@ Visit: `http://localhost:5000`
 
 ---
 
-## 🛡️ License & Usage Terms
-
-**Tool developed by:** [www.github.com/nitiksh](https://github.com/nitiksh)  
-**Website:** [ntxm.org](https://ntxm.org)
-**Buy From:** [payhip.com](https://payhip.com/b/ka09N)
-
-- ✅ You are allowed to use this tool for both **development** and **production** if purchased legally from an authorized source.
-- ❌ Unauthorized use, reverse engineering, or redistribution without permission is strictly prohibited.
-
----
-
-## 💬 Support
-
-Have issues or feature requests?  
-DM via GitHub: [@nitiksh](https://github.com/nitiksh)
-
----
-
 ## 🙏 Credits
 
 - Python & Flask
 - Tesseract OCR (by Google)
 - PIL (Python Imaging Library)
-
----
-
-### 🔐 Legal Notice
-
-This tool is protected under copyright and license terms.  
-By using this software, you agree to the terms and conditions listed above.
 
 ---
 
