@@ -9,21 +9,42 @@ However, if you are using this tool without proper authorization or through ille
 
 import os
 import base64
+import uuid
 import requests
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from PIL import Image
 import pytesseract
 from io import BytesIO
+from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB upload limit
 
 # Set path to Tesseract executable
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 UPLOAD_FOLDER = "images"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "bmp", "tiff"}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def unique_filename(filename):
+    safe_name = secure_filename(filename)
+    extension = safe_name.rsplit(".", 1)[1].lower()
+    return f"{uuid.uuid4().hex}.{extension}"
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_large_file(error):
+    return jsonify({"error": "File is too large. Maximum upload size is 5 MB."}), 413
+
 
 # Serve the homepage
 @app.route("/")
@@ -40,10 +61,25 @@ def extract_text():
         file = request.files["image"]
         if file.filename == "":
             return jsonify({"error": "No file selected"}), 400
-        
-        image_path = os.path.join(UPLOAD_FOLDER, file.filename)
+
+        if not allowed_file(file.filename):
+            return jsonify({
+                "error": "Unsupported file type. Please upload PNG, JPG, JPEG, WEBP, BMP, or TIFF images."
+            }), 400
+
+        image_path = os.path.join(UPLOAD_FOLDER, unique_filename(file.filename))
         file.save(image_path)
-        image = Image.open(image_path)
+
+        try:
+            with Image.open(image_path) as uploaded_image:
+                uploaded_image.verify()
+
+            with Image.open(image_path) as uploaded_image:
+                image = uploaded_image.copy()
+        except Exception:
+            if os.path.exists(image_path):
+                os.remove(image_path)
+            return jsonify({"error": "Uploaded file is not a valid image"}), 400
 
     # Handle Image URL
     elif "image_url" in request.form:
